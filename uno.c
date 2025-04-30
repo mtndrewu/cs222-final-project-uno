@@ -46,14 +46,17 @@ int main(void) {
             printHelp();
             printf("Enter 1 to start the game, enter 2 to read the help manual, or enter 3 to exit: ");
             scanf("%c", &userChoice);
+            getchar();
+            printf("%c\n", userChoice);
         }
         if (userChoice == '3') {
             exit(0);
         }
-        else {
+        if (userChoice != '1' && userChoice != '2' && userChoice != '3') {
             printf("Error. Invalid choice.\n");
             printf("Enter 1 to start the game, enter 2 to read the help manual, or enter 3 to exit: ");
             scanf("%c", &userChoice);
+            getchar();
         }
     }
     

@@ -23,111 +23,6 @@ void printHelp() {
     printf("In the event you need to draw another card: enter '+ 1'.\n\n");
 }
 
-void userTurn(Card *userHand, Card *deck, Card *discardPile, int *userHandSize, int *userHandCapacity, int *deckSize, int *discardPileSize) {
-    printHand(userHand, *userHandSize);
-
-    char userColorChoice;
-    char userValueChoice;
-    printf("Select which card to draw from ([R/B/G/Y/W] + value shown on screen) (ex. R 1): ");
-    scanf("%c %c", &userColorChoice, &userValueChoice);
-
-    while ((userColorChoice == 'W' && (userValueChoice != 'D' && userValueChoice != 'W')) || (userColorChoice != 'W' && userValueChoice == 'W')) {
-        printHelp();
-        printHand(userHand, *userHandSize);
-        printf("Select which card to draw from ([R/B/G/Y/W] + value shown on screen) (ex. R 1): ");
-        scanf("%c %c", &userColorChoice, &userValueChoice);
-    }
-
-    while (userColorChoice == '+') {
-        addCardToHand(userHand, deck, userHandSize, userHandCapacity, deckSize);
-        printHand(userHand, *userHandSize);
-        printf("Select which card to draw from ([R/B/G/Y/W] + value shown on screen) (ex. R 1): ");
-        getchar();
-        scanf("%c %c", &userColorChoice, &userValueChoice);
-    }
-
-    int cardIdx = findCard(userHand, *userHandSize, userColorChoice, userValueChoice);
-    while (cardIdx == *userHandSize) {
-        printf("Cannot find card in your hand.\n");
-        printf("Select which card to draw from ([R/B/G/Y/W] + value shown on screen) (ex. R 1): ");
-        scanf("%c %c", &userColorChoice, &userValueChoice);
-        int cardIdx = findCard(userHand, *userHandSize, userColorChoice, userValueChoice);
-    }
-
-    
-    printf("Color is %c, value is %c\n", userColorChoice, userValueChoice);
-    removeCardFromHand(userHand, discardPile, userHandSize, discardPileSize, cardIdx);
-
-    if (discardPile[(*discardPileSize) - 1].color == 'W') {
-        char pickColor;
-        printf("Please pick the color you want to assign this wild card as (R/G/B/Y): ");
-        scanf("%c", &pickColor);
-        discardPile[(*discardPileSize) - 1].color = pickColor;
-        getchar();
-    }
-    getchar(); // Removes new line character
-}
-
-void cpuTurn(Card *cpuHand, Card *deck, Card *discardPile, int *cpuHandSize, int *cpuHandCapacity, int *deckSize, int *discardPileSize) {
-    printHand(cpuHand, *cpuHandSize);
-    printCard(discardPile[(*discardPileSize) - 1]);
-    Card *candidates;
-    int candSize = 0;
-    candidates = (Card *) malloc(candSize * sizeof(Card));
-    for (int i = 0; i < *cpuHandSize; i++) {
-        if (cpuHand[i].color == discardPile[(*discardPileSize) - 1].color || cpuHand[i].color == 'W' || cpuHand[i].value == discardPile[(*discardPileSize) - 1].value) {
-            candSize++;
-            candidates = (Card *) realloc(candidates, candSize * sizeof(Card));
-            candidates[candSize - 1] = cpuHand[i];
-        }   
-    }
-
-    while (candSize == 0) {
-        addCardToHand(cpuHand, deck, cpuHandSize, cpuHandCapacity, deckSize);
-        printHand(cpuHand, *cpuHandSize);
-        printf("Last card in hand is %c %c\n", cpuHand[(*cpuHandSize) - 1].color, cpuHand[(*cpuHandSize) - 1].value);
-        if (cpuHand[(*cpuHandSize) - 1].color == discardPile[(*discardPileSize) - 1].color || cpuHand[(*cpuHandSize) - 1].color == 'W' || cpuHand[(*cpuHandSize) - 1].value == discardPile[(*discardPileSize) - 1].value) {
-            candSize++;
-            printf("New candSize: %d\n", candSize);
-            candidates = (Card *) realloc(candidates, candSize * sizeof(Card));
-            printf("Candidates reallocated.\n");
-            candidates[candSize - 1] = cpuHand[(*cpuHandSize) - 1];
-        }
-    }
-
-    for (int i = 0; i < candSize; i++) {
-        printf("Color: %c Size: %c\n", candidates[i].color, candidates[i].value);
-    }
-
-    int candIdx = rand() % candSize;
-    int cardIdx = findCard(cpuHand, *cpuHandSize, candidates[candIdx].color, candidates[candIdx].value);
-    removeCardFromHand(cpuHand, discardPile, cpuHandSize, discardPileSize, cardIdx);
-    
-    printf("CPU played ");
-    printCard(discardPile[(*discardPileSize) - 1]);
-    printf("\n");
-    if (discardPile[(*discardPileSize) - 1].color == 'W') {
-        int randomColor = rand() % 4;
-        switch (randomColor) {
-            case 0:
-                discardPile[(*discardPileSize) - 1].color = 'R';
-                break;
-            case 1:
-                discardPile[(*discardPileSize) - 1].color = 'B';
-                break;
-            case 2:
-                discardPile[(*discardPileSize) - 1].color = 'G';
-                break;
-            case 3:
-                discardPile[(*discardPileSize) - 1].color = 'Y';
-                break;
-        }
-        printf("Color of wildcard is now %c\n", discardPile[(*discardPileSize) - 1].color);
-        printCard(discardPile[(*discardPileSize) - 1]);
-    }
-    printf("\n\n");
-}
-
 void createHands(Card *userHand, Card *cpuHand, Card *deck, int* deckSize) {
     for (int i = 0; i < 14; i++) {
         if (i % 2 == 0) {
@@ -140,22 +35,18 @@ void createHands(Card *userHand, Card *cpuHand, Card *deck, int* deckSize) {
     }
 }
 
-void addCardToHand(Card *hand, Card *deck, int* handSize, int *handCapacity, int* deckSize) {
+void addCardToHand(Card *hand, Card *deck, int* handSize, int* deckSize) {
     Card newCard = deck[(*deckSize) - 1];
 
     (*deckSize)--;
-    Card *tmp = realloc(deck, *deckSize * sizeof(Card));
-    deck = tmp;
+    Card *tmpDeck = realloc(deck, *deckSize * sizeof(Card));
+    deck = tmpDeck;
 
-    if (*handSize == *handCapacity) {
-        *handCapacity *= 2;
-        Card *tmp = realloc(hand, *handCapacity * sizeof(Card));
-        hand = tmp;
-    }
+    (*handSize)++;
+    Card *tmpHand = realloc(hand, *handSize * sizeof(Card));
+    hand = tmpHand;
 
-    printf("%c %c\n", newCard.color, newCard.value);
-    hand[(*handSize)++] = newCard;
-    printf("%c %c\n", hand[*handSize].color, hand[*handSize].value);
+    hand[*handSize] = newCard;
 }
 
 int findCard(Card *hand, int handSize, char colorChoice, char valueChoice) {
@@ -184,6 +75,8 @@ void removeCardFromHand(Card *hand, Card *discardPile, int* handSize, int* disca
         printf(RED "Could not allocate memory. Program terminated.\n" RESET);
         exit(0);
     }
+
+    printf("Hand at idx %d is %c %c.\n", idx, hand[idx].color, hand[idx].value);
 
     discardPile[(*discardPileSize) - 1] = hand[idx];
     for (int i = idx + 1; i < *handSize; i++) {

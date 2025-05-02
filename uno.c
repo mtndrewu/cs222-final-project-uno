@@ -41,7 +41,6 @@ void userTurn(Card **userHand, Card *deck, Card **discardPile, int *userHandSize
     char userValueChoice;
 
     printf("Select which card to draw from ([R/B/G/Y/W] + value) (ex. R 1): ");
-    getchar();
     scanf("%c %c", &userColorChoice, &userValueChoice);
 
     while ((userColorChoice == 'W' && (userValueChoice != 'D' && userValueChoice != 'W')) || (userColorChoice != 'W' && userValueChoice == 'W')) {
@@ -58,9 +57,7 @@ void userTurn(Card **userHand, Card *deck, Card **discardPile, int *userHandSize
         getchar();
         scanf("%c %c", &userColorChoice, &userValueChoice);
     }
-
     int cardIdx = findCard(*userHand, *userHandSize, userColorChoice, userValueChoice);
-    printf("Index of card is at %d\n", cardIdx);
 
     while (cardIdx == -1) {
         printf("Card not found in hand.\n");
@@ -71,7 +68,6 @@ void userTurn(Card **userHand, Card *deck, Card **discardPile, int *userHandSize
     }
 
     removeCardFromHand(userHand, discardPile, userHandSize, discardPileSize, cardIdx);
-    printf("Top of discard pile has color %c and value %c.\n", (*discardPile)[(*discardPileSize) - 1].color, (*discardPile)[(*discardPileSize) - 1].value);
 
     if ((*discardPile)[(*discardPileSize) - 1].color == 'W') {
         char pickColor;
@@ -87,8 +83,6 @@ void userTurn(Card **userHand, Card *deck, Card **discardPile, int *userHandSize
 void cpuTurn(Card **cpuHand, Card *deck, Card **discardPile, int *cpuHandSize, int *deckSize, int *discardPileSize) {
     printf("-------------------------------------------------\n");
     printf("CPU's Turn\n");
-    printHand(*cpuHand, *cpuHandSize);
-    printf("Top of discard pile has color %c and value %c.\n", (*discardPile)[(*discardPileSize) - 1].color, (*discardPile)[(*discardPileSize) - 1].value);
 
     Card *candidates = (Card *) malloc(10 * sizeof(Card));
     if (candidates == NULL) {
@@ -111,7 +105,6 @@ void cpuTurn(Card **cpuHand, Card *deck, Card **discardPile, int *cpuHandSize, i
                 }
             }
             candidates[candSize++] = curr;
-            printf("Candidate of color %c and value %c added.\n", curr.color, curr.value);\
         }   
     }
     
@@ -119,8 +112,6 @@ void cpuTurn(Card **cpuHand, Card *deck, Card **discardPile, int *cpuHandSize, i
     while (candSize == 0) {
         addCardToHand(cpuHand, &deck, cpuHandSize, deckSize);
         Card drawn = (*cpuHand)[*cpuHandSize - 1];
-        printf("CPU drew card of color %c and value %c.\n", (*cpuHand)[(*cpuHandSize) - 1].color, (*cpuHand)[(*cpuHandSize) - 1].value);
-        //printf("Last card in hand is %c %c\n", cpuHand[(*cpuHandSize) - 1].color, cpuHand[(*cpuHandSize) - 1].value);
         if ((*cpuHand)[(*cpuHandSize) - 1].color == (*discardPile)[(*discardPileSize) - 1].color || (*cpuHand)[(*cpuHandSize) - 1].color == 'W' || (*cpuHand)[(*cpuHandSize) - 1].value == (*discardPile)[(*discardPileSize) - 1].value) {
             candSize++;
             if (candSize == maxCandidates) {
@@ -137,7 +128,11 @@ void cpuTurn(Card **cpuHand, Card *deck, Card **discardPile, int *cpuHandSize, i
     
 
     int candIdx = rand() % candSize;
+    while (candSize > 1 && candidates[candIdx].color == 'W' && candidates[candIdx].value == 'D') {
+        candIdx = rand() % candSize;
+    }
     int cardIdx = findCard(*cpuHand, *cpuHandSize, candidates[candIdx].color, candidates[candIdx].value);
+    
     removeCardFromHand(cpuHand, discardPile, cpuHandSize, discardPileSize, cardIdx);
     
     printf("CPU played ");
@@ -224,11 +219,12 @@ int main(void) {
         if (userHandSize == 1) {
             printf("User says UNO!\n");
         }
-        printf("From main: Top of discrd is color %c and value %c.\n", discardPile[discardPileSize - 1].color, discardPile[discardPileSize - 1].value);
+        if (discardPile[discardPileSize - 1].color, discardPile[discardPileSize - 1].value);
         cpuTurn(&cpuHand, deck, &discardPile, &cpuHandSize, &deckSize, &discardPileSize);
         if (cpuHandSize == 1) {
             printf("CPU says UNO!\n");
         }
+        getchar();
         
     }
 

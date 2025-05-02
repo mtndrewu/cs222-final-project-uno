@@ -64,7 +64,10 @@ void addCardToHand(Card **hand, Card **deck, int* handSize, int* deckSize) {
 }
 
 int findCard(Card *hand, int handSize, char colorChoice, char valueChoice) {
+    //getchar();
+    printf("Desired Color: %c, Desired Value: %c\n", colorChoice, valueChoice); 
     for (int i = 0; i < handSize; i++) {
+        printf("Color: %c, Value: %c\n", hand[i].color, hand[i].value); 
         if (hand[i].color == colorChoice && hand[i].value == valueChoice) {
             return i;
         }

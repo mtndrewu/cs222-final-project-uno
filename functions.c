@@ -23,67 +23,92 @@ void printHelp() {
     printf("In the event you need to draw another card: enter '+ 1'.\n\n");
 }
 
-void createHands(Card *userHand, Card *cpuHand, Card *deck, int* deckSize) {
-    for (int i = 0; i < 14; i++) {
-        if (i % 2 == 0) {
-            userHand[i/2] = deck[*deckSize - 1];
-        }
-        else {
-            cpuHand[i/2] = deck[*deckSize - 1];
-        }
-        (*deckSize) -= 1;
+void createHands(Card **userHand, Card **cpuHand, Card *deck, int* deckSize, int* userHandSize, int* cpuHandSize) {
+    *userHandSize = *cpuHandSize = 7;
+    *userHand = (Card *) malloc(7 * sizeof(Card));
+    *cpuHand = (Card *) malloc(7 * sizeof(Card));
+    for (int i = 0; i < 7; i++) {
+        (*userHand)[i] = deck[--(*deckSize)];
+        (*cpuHand)[i] = deck[--(*deckSize)];
     }
 }
 
-void addCardToHand(Card *hand, Card *deck, int* handSize, int* deckSize) {
-    Card newCard = deck[(*deckSize) - 1];
-
+void addCardToHand(Card **hand, Card **deck, int* handSize, int* deckSize) {
+    if (*deckSize == 0) {
+        printf(RED "Deck is empty. Cannot draw more cards.\n" RESET);
+        return;
+    }
+    
+    Card newCard = (*deck)[(*deckSize) - 1];
     (*deckSize)--;
-    Card *tmpDeck = realloc(deck, *deckSize * sizeof(Card));
-    deck = tmpDeck;
 
+
+    Card *tmpDeck = realloc(*deck, ((*deckSize) - 1) * sizeof(Card));
+    if (tmpDeck == NULL) {
+        printf(RED "Cannot reallocate memory. Program terminated.\n" RESET);
+        exit(0);
+    }
+    *deck = tmpDeck;
+    (*deckSize)--;
+
+    
+    Card *tmpHand = realloc(*hand, ((*handSize) + 1) * sizeof(Card));
+    if (tmpHand == NULL) {
+        printf(RED "Cannot reallocate memory. Program terminated.\n" RESET);
+        exit(0);
+    }
+    *hand = tmpHand;
+
+    (*hand)[*handSize] = newCard;
     (*handSize)++;
-    Card *tmpHand = realloc(hand, *handSize * sizeof(Card));
-    hand = tmpHand;
-
-    hand[*handSize] = newCard;
 }
 
 int findCard(Card *hand, int handSize, char colorChoice, char valueChoice) {
-    int i = 0;
-    for (i = 0; i < handSize; i++) {
+    for (int i = 0; i < handSize; i++) {
         if (hand[i].color == colorChoice && hand[i].value == valueChoice) {
             return i;
         }
     }
-    i++;
-    return i;
+    return -1;
 }
 
-void removeCardFromHand(Card *hand, Card *discardPile, int* handSize, int* discardPileSize, int idx) {
+void removeCardFromHand(Card **hand, Card **discardPile, int* handSize, int* discardPileSize, int idx) {
     (*discardPileSize)++;
     
-    if (discardPile == NULL) {
-        discardPile = (Card *) malloc(*discardPileSize * sizeof(Card));
+    if (*discardPile == NULL) {
+        *discardPile = (Card *) malloc((*discardPileSize) * sizeof(Card));
     }
 
     else {
-        discardPile = (Card *) realloc(discardPile, *discardPileSize * sizeof(Card));
+        Card *tmpDiscardPile = (Card *) realloc(*discardPile, (*discardPileSize) * sizeof(Card));
+        if (tmpDiscardPile == NULL) {
+            printf(RED "Cannot reallocate memory. Program terminated.\n" RESET);
+            exit(0);
+        }
+        *discardPile = tmpDiscardPile;
     }
 
-    if (discardPile == NULL) {
-        printf(RED "Could not allocate memory. Program terminated.\n" RESET);
-        exit(0);
-    }
+    (*discardPile)[(*discardPileSize) - 1] = (*hand)[idx];
 
-    printf("Hand at idx %d is %c %c.\n", idx, hand[idx].color, hand[idx].value);
-
-    discardPile[(*discardPileSize) - 1] = hand[idx];
     for (int i = idx + 1; i < *handSize; i++) {
-        hand[i - 1] = hand[i];
+        (*hand)[i - 1] = (*hand)[i];
     }
+
     (*handSize)--;
-    hand = (Card *) realloc(hand, *handSize * sizeof(Card));
+
+    if (*handSize > 0) {
+        Card *tmpHand = realloc(*hand, (*handSize) * sizeof(Card));
+        if (tmpHand == NULL) {
+            printf(RED "Cannot reallocate memory. Program terminated.\n" RESET);
+            exit(0);
+        }
+        *hand = tmpHand;
+    }
+
+    else {
+        free(*hand);
+        *hand = NULL;
+    }
     
 }
 

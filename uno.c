@@ -15,6 +15,7 @@
 #define RESET "\033[0m"
 
 
+
 void printTitle() {
     printf(YELLOW "UUUUUUUU     UUUUUUUUNNNNNNNN        NNNNNNNN     OOOOOOOOO     \n");
     printf("U::::::U     U::::::UN:::::::N       N::::::N   OO:::::::::OO   \n");
@@ -153,7 +154,6 @@ void cpuTurn(Card **cpuHand, Card *deck, Card **discardPile, int *cpuHandSize, i
 }
 
 int main(void) {
-   
     char userChoice;
     printTitle();
     printf("By Drew Urenko\n");
@@ -212,6 +212,10 @@ int main(void) {
         exit(0);
     }
     printf("Hands created.\n");
+
+    int direction = 1;
+    int currentPlayer = 0;
+    int nextDrawCount = 0;
 
     while (userHandSize != 0 && cpuHandSize != 0) {
         // User Turn

@@ -13,6 +13,8 @@
 #define WHITE "\033[37m"
 #define RESET "\033[0m"
 
+#define NUM_PLAYERS 2
+
 void printHelp() {
     printf("A card's color is indicated by the color of the text (wildcard cards have white text), which corresponds to the value of the card.\n");
     printf("List of possible colors and commands to draw card of that color:\n");
@@ -157,4 +159,38 @@ void printHand(Card *userHand, int userHandSize) {
         }
     }
     printf("\n\n");
+}
+
+// will add later
+void processCard(Card played_card, int *direction, int *currentPlayer, int *nextDrawCount) {
+    switch (played_card.value) {
+        case 'S':
+            *currentPlayer = (*currentPlayer + *direction + NUM_PLAYERS) % NUM_PLAYERS;
+            printf("Next player skipped!\n");
+            break;
+        case 'R':
+            *direction *= -1;
+            printf("Direction reversed.\n");
+            break;
+        case 'D':
+            if (played_card.color == 'W') {
+                *nextDrawCount = 4;
+                printf("Next player draws 4 cards.\n");
+            }
+            else {
+                *nextDrawCount = 2;
+                printf("Next player draws 2 cards.\n");
+            }
+            break;
+        case 'W':
+            char pickColor;
+            printf("Choose color for wild card (R/G/B/Y): ");
+            getchar();
+            scanf("%c", &pickColor);
+            printf("User picks %c\n", pickColor);
+            //(*discardPile)[(*discardPileSize) - 1].color = pickColor;
+            break;
+        default:
+            break;
+    }
 }
